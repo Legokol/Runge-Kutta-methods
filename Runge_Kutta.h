@@ -4,16 +4,17 @@
 #include <vector>
 #include <array>
 
+template <typename T>
 class Runge_Kutta {
 private:
     double h;
-    double y0;
+    T y0;
     std::vector<double> x;
 
-    double (*f)(double, double);
+    T (*f)(double, T);
 
 public:
-    Runge_Kutta(double a, double b, double _y0, double (*_f)(double, double), double _h) {
+    Runge_Kutta(double a, double b, T _y0, T (*_f)(double, T), double _h) {
         f = _f;
         h = _h;
         x.resize((b - a) / h + 1);
@@ -23,9 +24,13 @@ public:
         y0 = _y0;
     }
 
-    std::array<std::vector<double>, 2> solve() {
-        std::vector<double> y(x.size());
-        std::vector<double> k(4);
+    std::vector<double> getGrid() {
+        return x;
+    }
+
+    std::vector<T> solve() {
+        std::vector<T> y(x.size());
+        std::vector<T> k(4);
         y[0] = y0;
         for (int i = 0; i < x.size() - 1; ++i) {
             k[0] = (*f)(x[i], y[i]);
@@ -35,8 +40,7 @@ public:
 
             y[i + 1] = y[i] + h / 6 * (k[0] + 2 * k[1] + 2 * k[2] + k[3]);
         }
-        std::array<std::vector<double>, 2> res = {x, y};
-        return res;
+        return y;
     }
 };
 

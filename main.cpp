@@ -1,20 +1,24 @@
 #include <iostream>
 #include <cmath>
+#include <Eigen/Dense>
 #include "Runge_Kutta.h"
 
-double f(double x, double y) {
-    return y;
+using Eigen::Vector2d;
+
+Vector2d f(double x, Vector2d y) {
+    return Vector2d(y(1), x * sqrt(y(0)));
 }
 
 int main() {
-    int n = 10;
+    double h = 0.01;
 
-    Runge_Kutta solver(0, 1, 1, f, 1. / n);
+    Runge_Kutta<Vector2d> solver(0, 1, Vector2d(0, 1.865234375), f, h);
 
+    auto x = solver.getGrid();
     auto solution = solver.solve();
 
-    for (int i = 0; i < solution[0].size(); ++i) {
-        std::cout << "x = " << solution[0][i] << " numerical solution: " << solution[1][i] << " analytical solution: " << exp(solution[0][i]) << std::endl;
+    for (int i = 0; i < x.size(); ++i) {
+        std::cout << "x = " << x[i] << " numerical solution: " << solution[i](0) << std::endl;
     }
     return 0;
 }
