@@ -2,15 +2,14 @@
 #define CLASSICAL_RUNGE_KUTTA_METHOD_RUNGE_KUTTA_H
 
 #include <vector>
-#include <array>
 
-template <typename T>
+template<typename T>
 struct point {
     double x;
     T y;
 };
 
-template <typename T>
+template<typename T>
 class Runge_Kutta {
 private:
 
@@ -30,7 +29,7 @@ public:
             k[2] = (*f)(solution[i].x + h / 2, solution[i].y + h * k[1] / 2);
             k[3] = (*f)(solution[i].x + h, solution[i].y + h * k[3]);
 
-            solution[i+1].y = solution[i].y + h / 6 * (k[0] + 2 * k[1] + 2 * k[2] + k[3]);
+            solution[i + 1].y = solution[i].y + h / 6 * (k[0] + 2 * k[1] + 2 * k[2] + k[3]);
         }
         return solution;
     }
