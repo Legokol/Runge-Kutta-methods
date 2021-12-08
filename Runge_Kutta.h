@@ -5,44 +5,35 @@
 #include <array>
 
 template <typename T>
-class Runge_Kutta {
-private:
-    double h;
-    T y0;
-    std::vector<double> x;
-
-    T (*f)(double, T);
-
-public:
-    Runge_Kutta(double a, double b, T _y0, T (*_f)(double, T), double _h) {
-        f = _f;
-        h = _h;
-        x.resize((b - a) / h + 1);
-        for (int i = 0; i < x.size(); ++i) {
-            x[i] = a + i * h;
-        }
-        y0 = _y0;
-    }
-
-    std::vector<double> getGrid() {
-        return x;
-    }
-
-    std::vector<T> solve() {
-        std::vector<T> y(x.size());
-        std::vector<T> k(4);
-        y[0] = y0;
-        for (int i = 0; i < x.size() - 1; ++i) {
-            k[0] = (*f)(x[i], y[i]);
-            k[1] = (*f)(x[i] + h / 2, y[i] + h * k[0] / 2);
-            k[2] = (*f)(x[i] + h / 2, y[i] + h * k[1] / 2);
-            k[3] = (*f)(x[i] + h, y[i] + h * k[3]);
-
-            y[i + 1] = y[i] + h / 6 * (k[0] + 2 * k[1] + 2 * k[2] + k[3]);
-        }
-        return y;
-    }
+struct point {
+    double x;
+    T y;
 };
 
+template <typename T>
+class Runge_Kutta {
+private:
+
+public:
+    Runge_Kutta() {}
+
+    std::vector<point<T>> solve(double a, double b, T y0, T (*f)(double, T), double h) {
+        std::vector<point<T>> solution((b - a) / h + 1);
+        for (int i = 0; i < solution.size(); ++i) {
+            solution[i].x = a + i * h;
+        }
+        solution[0].y = y0;
+        std::vector<T> k(4);
+        for (int i = 0; i < solution.size() - 1; ++i) {
+            k[0] = (*f)(solution[i].x, solution[i].y);
+            k[1] = (*f)(solution[i].x + h / 2, solution[i].y + h * k[0] / 2);
+            k[2] = (*f)(solution[i].x + h / 2, solution[i].y + h * k[1] / 2);
+            k[3] = (*f)(solution[i].x + h, solution[i].y + h * k[3]);
+
+            solution[i+1].y = solution[i].y + h / 6 * (k[0] + 2 * k[1] + 2 * k[2] + k[3]);
+        }
+        return solution;
+    }
+};
 
 #endif //CLASSICAL_RUNGE_KUTTA_METHOD_RUNGE_KUTTA_H

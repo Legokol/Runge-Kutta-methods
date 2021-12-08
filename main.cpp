@@ -12,13 +12,12 @@ Vector2d f(double x, Vector2d y) {
 int main() {
     double h = 0.01;
 
-    Runge_Kutta<Vector2d> solver(0, 1, Vector2d(0, 1.865234375), f, h);
+    Runge_Kutta<Vector2d> solver;
 
-    auto x = solver.getGrid();
-    auto solution = solver.solve();
+    auto solution = solver.solve(0, 1, Vector2d(0, 1.865234375), f, h);
 
-    for (int i = 0; i < x.size(); ++i) {
-        std::cout << "x = " << x[i] << " numerical solution: " << solution[i](0) << std::endl;
+    for (int i = 0; i < solution.size(); ++i) {
+        std::cout << "x = " << solution[i].x << " numerical solution: " << solution[i].y(0) << std::endl;
     }
     return 0;
 }
