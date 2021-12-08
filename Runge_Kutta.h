@@ -2,6 +2,7 @@
 #define CLASSICAL_RUNGE_KUTTA_METHOD_RUNGE_KUTTA_H
 
 #include <vector>
+#include <array>
 
 class Runge_Kutta {
 private:
@@ -12,17 +13,17 @@ private:
     double (*f)(double, double);
 
 public:
-    Runge_Kutta(double a, double b, double _y0, double (*_f)(double, double), int n) {
+    Runge_Kutta(double a, double b, double _y0, double (*_f)(double, double), double _h) {
         f = _f;
-        x.resize(n + 1);
-        h = (b - a) / n;
+        h = _h;
+        x.resize((b - a) / h + 1);
         for (int i = 0; i < x.size(); ++i) {
             x[i] = a + i * h;
         }
         y0 = _y0;
     }
 
-    std::vector<double> solve() {
+    std::array<std::vector<double>, 2> solve() {
         std::vector<double> y(x.size());
         std::vector<double> k(4);
         y[0] = y0;
@@ -34,7 +35,8 @@ public:
 
             y[i + 1] = y[i] + h / 6 * (k[0] + 2 * k[1] + 2 * k[2] + k[3]);
         }
-        return y;
+        std::array<std::vector<double>, 2> res = {x, y};
+        return res;
     }
 };
 
