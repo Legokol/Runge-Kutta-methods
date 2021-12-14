@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <array>
+#include <functional>
+#include <cmath>
 
 template<typename T>
 struct point {
@@ -35,9 +37,8 @@ public:
         return solution;
     }
 
-    std::vector<point<T>>
-    DormandPrince45(double a, double b, T y0, const std::function<T(double, const T &)> &f, const std::function<double(const T &)> &norm, double epsilon,
-                    double h0) {
+    std::vector<point<T>> DormandPrince45(double a, double b, T y0, const std::function<T(double, const T &)> &f,
+                                          const std::function<double(const T &)> &norm, double epsilon, double h0) {
         std::array<std::array<double, 6>, 6> A = {1. / 5, 0, 0, 0, 0, 0,
                                                   3. / 40, 9. / 40, 0, 0, 0, 0,
                                                   44. / 45, -56. / 15, 32. / 9, 0, 0, 0,
