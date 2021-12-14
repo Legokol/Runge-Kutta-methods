@@ -17,7 +17,7 @@ private:
 public:
     Runge_Kutta() {}
 
-    std::vector<point<T>> classicalRungeKutta(double a, double b, T y0, T (*f)(double, T), double h) {
+    std::vector<point<T>> classicalRungeKutta(double a, double b, T y0, const std::function<T(double, const T &)> &f, double h) {
         std::vector<point<T>> solution((b - a) / h + 1);
         for (int i = 0; i < solution.size(); ++i) {
             solution[i].x = a + i * h;
@@ -25,17 +25,19 @@ public:
         solution[0].y = y0;
         std::array<T, 4> k;
         for (int i = 0; i < solution.size() - 1; ++i) {
-            k[0] = (*f)(solution[i].x, solution[i].y);
-            k[1] = (*f)(solution[i].x + h / 2, solution[i].y + h * k[0] / 2);
-            k[2] = (*f)(solution[i].x + h / 2, solution[i].y + h * k[1] / 2);
-            k[3] = (*f)(solution[i].x + h, solution[i].y + h * k[3]);
+            k[0] = f(solution[i].x, solution[i].y);
+            k[1] = f(solution[i].x + h / 2, solution[i].y + h * k[0] / 2);
+            k[2] = f(solution[i].x + h / 2, solution[i].y + h * k[1] / 2);
+            k[3] = f(solution[i].x + h, solution[i].y + h * k[3]);
 
             solution[i + 1].y = solution[i].y + h / 6 * (k[0] + 2 * k[1] + 2 * k[2] + k[3]);
         }
         return solution;
     }
 
-    std::vector<point<T>> DormandPrince45(double a, double b, T y0, T (*f)(double, T), double (*norm)(T), double epsilon, double h0) {
+    std::vector<point<T>>
+    DormandPrince45(double a, double b, T y0, const std::function<T(double, const T &)> &f, const std::function<double(const T &)> &norm, double epsilon,
+                    double h0) {
         std::array<std::array<double, 6>, 6> A = {1. / 5, 0, 0, 0, 0, 0,
                                                   3. / 40, 9. / 40, 0, 0, 0, 0,
                                                   44. / 45, -56. / 15, 32. / 9, 0, 0, 0,

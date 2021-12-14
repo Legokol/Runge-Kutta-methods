@@ -6,25 +6,26 @@
 
 using Eigen::Vector2d;
 
-Vector2d f(double x, Vector2d y) {
+Vector2d f(double x, const Vector2d &y) {
     return Vector2d(y(1), x * sqrt(y(0)));
 }
 
-double f(double x, double y) {
+double F(double x, const double &y) {
     return y;
 }
 
-double norm(Vector2d x) {
+double norm(const Vector2d &x) {
     return x.cwiseAbs().maxCoeff();
 }
 
 int main() {
     double h = 0.1;
     double epsilon = 1e-8;
-    Runge_Kutta<double> solver;
+    Vector2d y0(1, 1.86);
+    Runge_Kutta<Vector2d> solver;
 
-    auto solution1 = solver.classicalRungeKutta(0, 1, 1, f, h);
-    auto solution2 = solver.DormandPrince45(0, 1, 1, f, fabs, epsilon, h);
+    auto solution1 = solver.classicalRungeKutta(0, 1, y0, f, h);
+    auto solution2 = solver.DormandPrince45(0, 1, y0, f, norm, epsilon, h);
 
     std::ofstream sol1;
     sol1.open("solution1.txt");
