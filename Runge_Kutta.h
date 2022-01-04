@@ -51,7 +51,7 @@ public:
         std::array<double, 7> b2 = {5179. / 57600, 0, 7571. / 16695, 393. / 640, -92097. / 339200, 187. / 2100,
                                     1. / 40};
         for (int i = 0; i < b2.size(); ++i) {
-            b2[i] = b2[i] - b1[i];
+            b2[i] -= b1[i];
         }
         std::array<T, 7> k;
         double h = h0;
@@ -62,7 +62,7 @@ public:
         while (x < b) {
             k[0] = f(x, solution.back().y);
             T y1 = solution.back().y + h * b1[0] * k[0];
-            T error = solution.back().y + h * b2[0] * k[0];
+            T error = h * b2[0] * k[0];
             for (int i = 1; i < 7; ++i) {
                 T y = solution.back().y;
                 for (int j = 0; j < i; ++j) {
@@ -75,8 +75,7 @@ public:
             double err = norm(error);
             if (err > tol) {
                 h *= std::min(pow(tol / err, .2), 1.3);
-            }
-            else {
+            } else {
                 x += h;
                 solution.push_back(point<T>{x, y1});
                 h *= std::min(pow(tol / err, .2), 1.3);
