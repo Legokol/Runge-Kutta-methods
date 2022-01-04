@@ -19,7 +19,8 @@ private:
 public:
     Runge_Kutta() {}
 
-    std::vector<point<T>> classicalRungeKutta(double a, double b, T y0, const std::function<T(double, const T &)> &f, double h) {
+    std::vector<point<T>>
+    classicalRungeKutta(double a, double b, T y0, const std::function<T(double, const T &)> &f, double h) {
         std::vector<point<T>> solution((b - a) / h + 1);
         for (int i = 0; i < solution.size(); ++i) {
             solution[i].x = a + i * h;
@@ -38,7 +39,7 @@ public:
     }
 
     std::vector<point<T>> DormandPrince45(double a, double b, T y0, const std::function<T(double, const T &)> &f,
-                                          const std::function<double(const T &)> &norm, double epsilon, double h0) {
+                                          const std::function<double(const T &)> &norm, double tol, double h0) {
         std::array<std::array<double, 6>, 6> A = {1. / 5, 0, 0, 0, 0, 0,
                                                   3. / 40, 9. / 40, 0, 0, 0, 0,
                                                   44. / 45, -56. / 15, 32. / 9, 0, 0, 0,
@@ -47,7 +48,11 @@ public:
                                                   35. / 384, 0, 500. / 1113, 125. / 192, -2187. / 6784, 11. / 84};
         std::array<double, 6> c = {1. / 5, 3. / 10, 4. / 5, 8. / 9, 1, 1};
         std::array<double, 7> b1 = {35. / 384, 0, 500. / 1113, 125. / 192, -2187. / 6784, 11. / 84, 0};
-        std::array<double, 7> b2 = {5179. / 57600, 0, 7571. / 16695, 393. / 640, -92097. / 339200, 187. / 2100, 1. / 40};
+        std::array<double, 7> b2 = {5179. / 57600, 0, 7571. / 16695, 393. / 640, -92097. / 339200, 187. / 2100,
+                                    1. / 40};
+        for (int i = 0; i < b2.size(); ++i) {
+            b2[i] = b2[i] - b1[i];
+        }
         std::array<T, 7> k;
         double h = h0;
         double x = a;
@@ -57,7 +62,7 @@ public:
         while (x < b) {
             k[0] = f(x, solution.back().y);
             T y1 = solution.back().y + h * b1[0] * k[0];
-            T y2 = solution.back().y + h * b2[0] * k[0];
+            T error = solution.back().y + h * b2[0] * k[0];
             for (int i = 1; i < 7; ++i) {
                 T y = solution.back().y;
                 for (int j = 0; j < i; ++j) {
@@ -65,16 +70,17 @@ public:
                 }
                 k[i] = f(x + c[i - 1] * h, y);
                 y1 += h * b1[i] * k[i];
-                y2 += h * b2[i] * k[i];
+                error += h * b2[i] * k[i];
             }
-            double err = norm(y1 - y2);
-            double h_opt = 0.9 * h * pow(epsilon / err, 0.2);
-            if (h_opt < h / 2)
-                h = h_opt;
+            double err = norm(error);
+            if (err > tol) {
+                h *= std::min(pow(tol / err, .2), 1.3);
+            }
             else {
                 x += h;
                 solution.push_back(point<T>{x, y1});
-                h = std::min(h_opt, h0);
+                h *= std::min(pow(tol / err, .2), 1.3);
+                h *= 0.9;
                 if (x + h > b) {
                     h = b - x;
                 }
